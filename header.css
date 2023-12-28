@@ -1,0 +1,184 @@
+:root{
+    --bleu: #107ACA;
+    --blanc: #ffffff;
+    --gris: #ebebeb;
+}
+
+body{
+    margin:0;
+}
+
+/* ############### Conteneur principaux ############### */
+
+#menu_navigation{
+    display: flex;
+    background-color: var(--bleu);
+    width: 100%;
+}
+
+#logo_site{
+    margin: auto 0px auto 80px;
+}
+
+#navigation{
+    background-color: var(--bleu);
+    margin-left: auto;
+    margin-right: 80px;
+}
+
+/* ############### Menu de navigation du header ############### */
+
+.defiler{
+    display:none;
+}
+
+.headings{
+    margin:0px;
+    display:flex;
+    padding:0px;
+    background-color: var(--bleu);
+    list-style-type:none;
+}
+
+.headings > li{
+    margin: 20px 20px;
+    font-size:18px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.headings > li > a{
+    color: var(--blanc);
+    padding: 5px 10px;
+    text-decoration:none;
+    transition:0.3s;
+}
+
+#navigation > ul > li{
+    float: left;
+    text-align: center;
+    position: relative;
+}
+
+#hamburger{
+    display:none;
+    flex-direction: column;
+    margin:auto;
+    transform:scale(0.8);
+}
+
+#hamburger span{
+    display: block;
+    width: 35px;
+    height: 5px;
+    background-color: rgb(255, 255, 255);
+    border-radius:2px;
+    margin:5px auto 5px auto;
+}
+
+
+/* ############### Effets lorsque l'on survole les éléments ############### */
+
+.headings a:hover{
+    cursor: pointer;
+    color: var(--blanc);
+}
+
+.lien_header {
+    display: inline-block;
+    text-decoration: none;
+}
+
+.lien_header::after {
+    content: '';
+    display: block;
+    width: 0;
+    height: 2px;
+    background: #ffffff;
+    transition: width .3s;
+}
+
+.lien_header:hover::after {
+    width: 100%;
+}
+
+/* ############### Personnalisation du menu déroulant des compétences ############### */
+
+
+.deroulant:hover .liste_deroulante,
+.liste_deroulante:hover {
+    display: block;
+    opacity: 1;
+}
+
+.liste_deroulante {
+    display: none;
+    background-color: var(--bleu);
+    list-style-type: none;
+    position: absolute;
+    width: 200px;
+    padding: 20px 0 0 0;
+    border-bottom-right-radius: 5px;
+    border-bottom-left-radius: 5px;
+    box-shadow: 0px 10px 34px -15px rgba(0, 0, 0, 0.24);
+    transition: opacity 0.3s ease-in-out;
+    opacity: 0;
+}
+
+.liste_deroulante li {
+    float: none;
+    text-align: center;
+    display: flex;
+    transition: 0.3s;
+}
+
+.liste_deroulante li a {
+    text-decoration: none;
+    margin: 10px 5px;
+    color: white;
+    padding: 5px 10px;
+    text-align: center;
+    transition: 0.3s;
+}
+
+@media screen and (max-width:700px){
+
+    /* Changement du menu de navigation */
+
+    .headings{
+        flex-wrap: wrap;
+        height:auto;
+        display:none;
+        border: none;
+        width: 100%;
+    }
+
+    .headings li{
+        flex:100%;
+        display: flex;
+        margin: 10px 0px 0px 80px;
+        text-align: left;
+    }
+
+    .liste_deroulante{
+        display: none;
+        position:static;
+        border-bottom: none;
+    }
+
+    /* Propriétés hamburger */
+
+    #hamburger{
+        display:flex;
+    }
+    
+    #hamburger:hover{
+        cursor: pointer;
+    }
+
+    .defiler:checked ~ .headings{
+        position: absolute;
+        left:0;
+        display:flex;
+    }
+}

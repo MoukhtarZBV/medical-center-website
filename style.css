@@ -1,0 +1,311 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #ffffff;
+}
+
+#body_fond {
+    background: url(Images/fond.png);
+    background-size: 400px;
+    background-color: #ebebeb;
+}
+
+/* =========== Popup erreur ou succes =========== */
+
+.popup {
+    margin: 20px auto 0px auto;
+    max-width: 600px;
+    font-size: 16px;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.succes {
+    background-color: #4CAF50;
+    color: #12571a;
+}
+
+.erreur {
+    background-color: rgba(214, 51, 51, 0.8);
+    color: #470e0e;
+}
+
+/* =========== Formulaire (Ajout/Modification Usager/Medecin) =========== */
+
+.titre_formulaire h1 {
+    text-align: center;
+    margin: 0px auto;
+    max-width: 600px;
+    font-size: 2em;
+    color: #333;
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-top-right-radius: 8px;
+    border-top-left-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+    border-bottom: 1px solid #ebebeb;
+}
+
+.formulaire {
+    max-width: 600px;
+    margin: 0px auto 40px auto;
+    background: white;
+    padding: 20px;
+    box-shadow: 2px 5px 10px rgba(0, 0, 0, 0.1);
+    border-bottom-right-radius: 8px;
+    border-bottom-left-radius: 8px;
+    overflow: hidden;
+}
+
+/* =========== Inputs des formulaires =========== */
+
+input[type="text"],
+input[type="date"],
+input[type="submit"],
+input[type="reset"],
+select {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    box-sizing: border-box;
+    border-radius: 4px;
+}
+
+.conteneur_boutons {
+    display: flex;
+    justify-content: flex-end;
+}
+
+input[type="submit"],
+input[type="reset"] {
+    font-size: 16px;
+    width: auto;
+    background-color: #107ACA;
+    color: white;
+    cursor: pointer;
+    border: none;
+    margin-left: 10px;
+    transition: background-color 0.3s;
+}
+
+input[type="reset"] {
+    background-color: #bbbbbb;
+}
+
+input[type="submit"]:hover,
+input[type="reset"]:hover {
+    opacity: 0.9;
+}
+
+input[type="radio"] {
+    margin-right: 5px;
+}
+
+#selecteur_medecin_referent {
+    width: 100%;
+    display: block;
+}
+
+/* Civilite */
+
+.conteneur_civilite {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 10px 0;
+    margin-bottom: 20px;
+}
+
+.choix_civilite {
+    display: flex;
+    align-items: center;
+    margin-left: 20px;
+}
+
+.choix_civilite>label {
+    margin-right: 15px;
+}
+
+.choix_civilite img.image_civilite {
+    margin-left: 0px;
+    width: 24px;
+    height: 24px;
+    pointer-events: none;
+}
+
+/* =========== Disposition des éléments dans les formulaires =========== */
+
+.ligne_formulaire {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.colonne_formulaire {
+    display: flex;
+    flex-direction: column;
+}
+
+.colonne_formulaire.large {
+    flex: 3;
+    margin-right: 10px;
+}
+
+.colonne_formulaire.petit {
+    flex: 1;
+}
+
+.input-large {
+    width: 100%;
+}
+
+.input-petit {
+    width: 100%;
+}
+
+.colonne_formulaire.moitie {
+    flex: 1;
+    margin-right: 10px;
+}
+
+.colonne_formulaire.moitie:last-child {
+    margin-right: 0;
+}
+
+.input-moitie {
+    width: 100%;
+}
+
+/* ========================================= */
+/* =============== Connexion =============== */
+/* ========================================= */
+
+#conteneur_connexion {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 400px;
+    margin: 100px auto;
+    font-family: 'Arial', sans-serif;
+}
+
+#header_connexion {
+    background-color: #107ACA;
+    color: white;
+    padding: 20px;
+    text-align: center;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+#header_connexion h2 {
+    margin: 0;
+}
+
+#corps_connexion {
+    padding: 20px;
+    background-color: #ffffff;
+}
+
+#corps_connexion form {
+    display: flex;
+    flex-direction: column;
+}
+
+#corps_connexion input[type=text],
+#corps_connexion input[type=password] {
+    padding: 10px;
+    background: url(Images/utilisateur.png) no-repeat scroll 8px 50%;
+    padding-left: 40px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-size: 16px;
+}
+
+#corps_connexion input[type=password] {
+    background: url(Images/motDePasse.png) no-repeat scroll 8px 50%;
+    background-size: 16px;
+}
+
+#corps_connexion input[type=submit] {
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    margin-left: 0;
+    background-color: #107ACA;
+    color: white;
+    cursor: pointer;
+}
+
+#corps_connexion input[type=submit]:hover {
+    background-color: #2789d4;
+}
+
+#footer_connexion {
+    background-color: #f6f6f6;
+    padding: 10px;
+    text-align: center;
+}
+
+#footer_connexion p {
+    margin: 0;
+    color: #333;
+}
+
+/* =================================================================== */
+/* =============== Pages affichages (Medecins/Usagers) =============== */
+/* =================================================================== */
+
+.main_affichage {
+    margin: 10px 80px 60px 80px;
+}
+
+.conteneur_table_recherche {
+    margin-bottom: 20px;
+}
+
+.formulaire_table {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1em;
+}
+
+.formulaire_table input[type="text"] {
+    flex-grow: 2;
+    margin-right: 8px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+#table_affichage {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+#table_affichage th {
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    user-select: none;
+}
+
+#table_affichage th,
+#table_affichage td {
+    padding: 8px;
+    border: 1px solid #ddd;
+    text-align: left;
+    max-width: 200px;
+    text-overflow: ellipsis;
+}
+
+#table_affichage tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.nombre_lignes {
+    text-align: center;
+    margin-bottom: 20px;
+}
