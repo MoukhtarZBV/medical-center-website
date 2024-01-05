@@ -60,12 +60,11 @@ body {
 
 /* =========== Inputs des formulaires =========== */
 
-input[type="text"],
-input[type="date"],
-input[type="submit"],
-input[type="reset"],
+input,
+.bouton_ajouter,
 select {
     width: 100%;
+    height: 40px;
     padding: 10px;
     margin: 10px 0;
     border: 1px solid #ddd;
@@ -78,8 +77,14 @@ select {
     justify-content: flex-end;
 }
 
+.formulaire_table .conteneur_boutons {
+    margin-bottom: 0;
+    margin-top: auto;
+}
+
 input[type="submit"],
-input[type="reset"] {
+input[type="reset"],
+.bouton_ajouter {
     font-size: 16px;
     width: auto;
     background-color: #107ACA;
@@ -94,8 +99,25 @@ input[type="reset"] {
     background-color: #bbbbbb;
 }
 
+.bouton_ajouter {
+    background-color: #4CAF50;
+    display: flex;
+    z-index: inherit;
+    align-items: center;
+    text-decoration: none;
+}
+
+.lien_ajouter {
+    text-decoration: none;
+}
+
+.bouton_ajouter img {
+    margin-right: 5px;
+}
+
 input[type="submit"]:hover,
-input[type="reset"]:hover {
+input[type="reset"]:hover,
+.bouton_ajouter {
     opacity: 0.9;
 }
 
@@ -115,7 +137,8 @@ input[type="radio"] {
     flex-direction: row;
     align-items: center;
     padding: 10px 0;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
+    max-height: 40px;
 }
 
 .choix_civilite {
@@ -124,7 +147,7 @@ input[type="radio"] {
     margin-left: 20px;
 }
 
-.choix_civilite>label {
+.choix_civilite > label {
     margin-right: 15px;
 }
 
@@ -157,14 +180,6 @@ input[type="radio"] {
     flex: 1;
 }
 
-.input-large {
-    width: 100%;
-}
-
-.input-petit {
-    width: 100%;
-}
-
 .colonne_formulaire.moitie {
     flex: 1;
     margin-right: 10px;
@@ -172,10 +187,6 @@ input[type="radio"] {
 
 .colonne_formulaire.moitie:last-child {
     margin-right: 0;
-}
-
-.input-moitie {
-    width: 100%;
 }
 
 /* ========================================= */
@@ -292,13 +303,23 @@ input[type="radio"] {
     user-select: none;
 }
 
+#table_affichage th:first-of-type {border-top-left-radius: 8px;}
+#table_affichage th:last-of-type {border-top-right-radius: 8px;}
+
+#table_affichage tbody tr:first-of-type {border-top: 1px solid #ddd;}
+#table_affichage tr:last-of-type {border-bottom: 1px solid #ddd;}
+
 #table_affichage th,
 #table_affichage td {
     padding: 8px;
-    border: 1px solid #ddd;
     text-align: left;
     max-width: 200px;
     text-overflow: ellipsis;
+}
+
+#table_affichage td {
+    border-left: 1px solid #ddd;
+    border-right: 1px solid #ddd;
 }
 
 #table_affichage tr:nth-child(even) {

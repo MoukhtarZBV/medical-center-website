@@ -48,10 +48,12 @@
     <main class="main_affichage">
         <h1> Liste des usagers </h1>
         <div class="conteneur_table_recherche">
-            <form method="post" action="Usagers.php" class="formulaire_table">
+            <form method="post" action="affichageUsagers.php" class="formulaire_table">
                 <input type="text" name="criteres" placeholder="Entrez des mots-clés séparés par un espace" value="<?php if (isset($_POST['criteres'])) echo $_POST['criteres'] ?>">
-                <input type="reset" value="Vider">
                 <input type="submit" value="Rechercher">
+                <a href="ajoutUsager.php" class="lien_ajouter">
+                    <div class="bouton_ajouter"><img src="Images/ajouter.png" width="20px"/>Ajouter</div>
+                </a>
             </form>
             </div>
                 <?php
