@@ -1,10 +1,10 @@
-<?php
-    try {
-        $pdo = new PDO("mysql:host=localhost;dbname=cabinetmed", 'root', '');
-    } catch (Exception $e) {
-        echo ("Erreur : " . $e);
-    }
-    
+<?php session_start();
+    require('fonctions.php');
+    verifierAuthentification();
+    $pdo = creerConnexion();
+
+    $idMedecin = '';
+    $idUsager = '';
     if (isset($_POST["valider"])) {
         $idMedecin = $_POST["idMedecin"];
         $idUsager = $_POST["idUsager"];
@@ -16,52 +16,41 @@
 
 <head>
     <meta charset="utf-8" />
+    <link rel="stylesheet" href="header.css">
     <link rel="stylesheet" href="style.css">
     <title> Consultations </title>
 </head>
 
 <body>
+    <header id="menu_navigation">
+        <div id="logo_site">
+            <a href="accueil.html"><img src="Images/logo.png" width="250"></a>
+        </div>
+        <nav id="navigation">
+            <label for="hamburger_defiler" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </label>
+            <input class="defiler" type="checkbox" id="hamburger_defiler" role="button" aria-pressed="true">
+            <ul class="headings">
+                <li><a class="lien_header" href="affichageUsagers.php">Usagers</a></li>
+                <li><a class="lien_header" href="affichageMedecins.php">Médecins</a></li>
+                <li><a class="lien_header" href="affichageConsultations.php">Consultations</a></li>
+                <li><a class="lien_header" href="statistiques.php">Statistiques</a></li>
+            </ul>
+        </nav>
+    </header>
     <main class="main_affichage">
         <h1> Liste des consultations </h1>
 
         <form class="formulaire_table" method="post" action="affichageConsultations.php">
             <div class="colonne_formulaire large">
-                Médecin <select name="idMedecin">
-                    <option value="">Tous les médecins</option>
-                    <?php
-                    $stmt = $pdo->prepare("SELECT idMedecin, civilite, nom, prenom FROM medecin");
-                    if (!$stmt) { echo "Erreur lors d'un prepare statement : " . $stmt->errorInfo(); exit(); }
-                    if ($stmt->execute()) {
-                        while ($dataMedecin = $stmt->fetch()) {
-                            $id = $dataMedecin["idMedecin"];
-                            $titre = $dataMedecin["civilite"] . '. ' . $dataMedecin["nom"] . ' ' . $dataMedecin["prenom"];
-                            $selected = $idMedecin == $id ? 'selected' : '';
-                            echo '<option value=' . $id . ' ' . $selected . '> ' . $titre . '</option>';
-                        }
-                    } else {
-                        echo "Erreur lors d'un execute statement : " . $stmt->errorInfo(); exit();
-                    }
-                    ?>
-                </select>
+                Médecin <?php creerComboboxMedecins($pdo, $idMedecin, 'Tous les médecins'); ?>
             </div>
             <div class="colonne_formulaire large">
-                Patient <select name="idUsager">
-                    <option value="">Tous les usagers</option>
-                    <?php
-                    $stmt = $pdo->prepare("SELECT idUsager, numeroSecuriteSociale, civilite, nom, prenom FROM usager ORDER BY nom, prenom ASC");
-                    if (!$stmt) { echo "Erreur lors d'un prepare statement : " . $stmt->errorInfo(); exit(); }
-                    if ($stmt->execute()) {
-                        while ($dataUsager = $stmt->fetch()) {
-                            $id = $dataUsager["idUsager"];
-                            $titre = str_pad($dataUsager["civilite"].'. ', 5, ' ') . $dataUsager["nom"] . ' ' . $dataUsager["prenom"] . ' (' . $dataUsager["numeroSecuriteSociale"] . ')';
-                            $selected = $idUsager == $id ? 'selected' : '';
-                            echo '<option value=' . $id . ' ' . $selected . '> ' . $titre . '</option>';
-                        }
-                    } else {
-                        echo "Erreur lors d'un execute statement : " . $stmt->errorInfo(); exit();
-                    }
-                    ?>
-                </select>
+                Patient 
+                    <?php creerComboboxUsagers($pdo, $idUsager); ?>
             </div>
             <div class="colonne_formulaire petit">
                 Date consultation <input type="date" name="date" value="<?php echo $date ?>">
@@ -76,8 +65,6 @@
         </form>
 
         <?php
-
-
         $reqConsultations = "SELECT CONCAT(m.nom, ' ', m.prenom) as nomMed, 
                                     CONCAT(u.nom, ' ', u.prenom) as nomUsager, 
                                     CONCAT(c.idMedecin, '$', c.dateConsultation, '$', c.heureDebut) as cle,
@@ -87,6 +74,8 @@
                                 AND c.idUsager = u.idUsager ";
 
         $arguments = array();
+
+        // Recherche en fonction des filtres
         if (!empty($idMedecin)) {
             $reqConsultations = $reqConsultations . "AND c.idMedecin = ? ";
             array_push($arguments, $idMedecin);
@@ -103,39 +92,36 @@
         $reqConsultations = $reqConsultations . "ORDER BY dateConsultation DESC, heureDebut DESC;";
         
         $stmt = $pdo->prepare($reqConsultations);
-        if (!$stmt) { echo "Erreur lors d'un prepare statement : " . $stmt->errorInfo(); }
+        verifierPrepare($stmt);
+        verifierExecute($stmt->execute($arguments));
 
-        if ($stmt->execute($arguments)) {
-            // On affiche toutes les lignes renvoyées ou un message si rien n'a été trouvé
-            if ($stmt->rowCount() > 0) {
-                echo '<div class="nombre_lignes"><strong>' . $stmt->rowCount() . '</strong> consultation(s) trouvée(s)</div>';
-                echo '<table id="table_affichage">
-                                        <thead>
-                                            <tr>
-                                                <th>Médecin</th>
-                                                <th>Patient</th>
-                                                <th>Date de consultation</th>
-                                                <th>Heure de consultation</th>
-                                                <th>Durée de consultation</th>
-                                            </tr>
-                                        </thead><tbody>';
-                while ($dataConsultation = $stmt->fetch()) {
-                    $elementsDate = explode('-', $dataConsultation['dateConsultation']);
-                    $dateFormatee = $elementsDate[2] . '/' . $elementsDate[1] . '/' . $elementsDate[0];
-                    echo '<tr><td>' . $dataConsultation['nomMed'] . '</td>' .
-                        '<td>' . $dataConsultation['nomUsager'] . '</td>' .
-                        '<td>' . $dateFormatee . '</td>' .
-                        '<td>' . str_replace(':', 'H', substr($dataConsultation['heureDebut'], 0, 5)) . '</td>' .
-                        '<td>' . str_replace(':', 'H', substr($dataConsultation['duree'], 0, 5)) . '</td>' .
-                        '<td>' . '<a href = \'modificationConsultation.php?id=' . $dataConsultation['cle'] . '\'><img src="Images/modifier.png" alt=""width=30px></a></td>' .
-                        '<td>' . '<a href = \'suppression.php?id=' . $dataConsultation['cle'] . '&type=consultation\'><img src="Images/supprimer.png" alt=""width=30px></a></td></tr>';
-                }
-                echo '</tbody></table>';
-            } else {
-                echo '<div class="nombre_lignes" style="color: red;"><strong>Aucune</strong> consultation trouvée</div>';
+        // On affiche toutes les lignes renvoyées ou un message si rien n'a été trouvé
+        if ($stmt->rowCount() > 0) {
+            echo '<div class="nombre_lignes"><strong>' . $stmt->rowCount() . '</strong> consultation(s) trouvée(s)</div>';
+            echo '<table id="table_affichage">
+                                    <thead>
+                                        <tr>
+                                            <th>Médecin</th>
+                                            <th>Patient</th>
+                                            <th>Date de consultation</th>
+                                            <th>Heure de consultation</th>
+                                            <th>Durée de consultation</th>
+                                        </tr>
+                                    </thead><tbody>';
+            while ($dataConsultation = $stmt->fetch()) {
+                $elementsDate = explode('-', $dataConsultation['dateConsultation']);
+                $dateFormatee = $elementsDate[2] . '/' . $elementsDate[1] . '/' . $elementsDate[0];
+                echo '<tr><td>' . $dataConsultation['nomMed'] . '</td>' .
+                    '<td>' . $dataConsultation['nomUsager'] . '</td>' .
+                    '<td>' . $dateFormatee . '</td>' .
+                    '<td>' . str_replace(':', 'H', substr($dataConsultation['heureDebut'], 0, 5)) . '</td>' .
+                    '<td>' . str_replace(':', 'H', substr($dataConsultation['duree'], 0, 5)) . '</td>' .
+                    '<td>' . '<a href = \'modificationConsultation.php?id=' . $dataConsultation['cle'] . '\'><img src="Images/modifier.png" alt=""width=30px></a></td>' .
+                    '<td>' . '<a href = \'suppression.php?id=' . $dataConsultation['cle'] . '&type=consultation\'><img src="Images/supprimer.png" alt=""width=30px></a></td></tr>';
             }
+            echo '</tbody></table>';
         } else {
-            echo "Erreur lors d'un execute statement : " . $stmt->errorInfo();
+            echo '<div class="nombre_lignes" style="color: red;"><strong>Aucune</strong> consultation trouvée</div>';
         }
         ?>
     </main>
