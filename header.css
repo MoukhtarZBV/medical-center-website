@@ -15,10 +15,17 @@ body{
     display: flex;
     background-color: var(--bleu);
     width: 100%;
+    position: sticky;
+    z-index: 20;
 }
 
 #logo_site{
     margin: auto 0px auto 80px;
+    transition: 0.3s ease;
+}
+
+#logo_site:hover{
+    transform: scale(1.05);
 }
 
 #navigation{
@@ -148,7 +155,7 @@ body{
     border-top: white 3px solid;
 }
 
-@media screen and (max-width:700px){
+@media screen and (max-width:1000px){
 
     /* Changement du menu de navigation */
 
@@ -163,7 +170,7 @@ body{
     .headings li{
         flex:100%;
         display: flex;
-        margin: 10px 0px 0px 80px;
+        margin-left:80px;
         text-align: left;
     }
 

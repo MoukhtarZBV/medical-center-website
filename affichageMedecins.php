@@ -2,6 +2,48 @@
     require('fonctions.php');
     verifierAuthentification();
     $pdo = creerConnexion();
+
+    // Début de la requête, on sélectionne tous les usages et leur potentiel médecin référent
+    $reqMedecins = ' SELECT * FROM Medecin';
+                    
+    // Si un nom et/ou un prénom ont été saisis
+    $arguments = array();
+    if (isset($_POST["valider"]) && !empty($_POST["valider"])) {
+        $nom = $_POST["nom"];
+        $prenom = $_POST["prenom"];
+        $reqMedecins = $reqMedecins . " WHERE lower(nom) LIKE lower(?)
+                                        AND lower(prenom) LIKE lower(?)";
+        $arguments = ["%$nom%", "%$prenom%"];
+    } 
+    $stmt = $pdo->prepare($reqMedecins);
+    verifierPrepare($stmt);
+    verifierExecute($stmt->execute($arguments));
+
+    // On affiche toutes les lignes renvoyées ou un message si rien n'a été trouvé
+    $table = '';
+    $nombreLignes = '';
+    if ($stmt->rowCount() > 0){
+        $nombreLignes ='<div class="nombre_lignes"><strong>'.$stmt->rowCount().'</strong> médecin(s) trouvé(s)</div>';
+        $table ='<div class="conteneur_table_affichage">
+                <table id="table_affichage">
+                <thead>
+                    <tr>
+                        <th onclick="sortTable(0)">Civilite </th>
+                        <th onclick="sortTable(1)">Nom </th>
+                        <th onclick="sortTable(2)">Prenom </th>
+                    </tr>
+                </thead><tbody>';
+        while ($dataMedecin = $stmt->fetch()){
+            $table = $table . '<tr><td>'.$dataMedecin['civilite'].'</td>'. 
+                    '<td>'.$dataMedecin['nom'].'</td>'.
+                    '<td>'.$dataMedecin['prenom'].'</td>'.                    
+                    '<td>'.'<a href = \'modificationMedecin.php?idMedecin='.$dataMedecin[0].'\'><img src="Images/modifier.png" alt=""width=30px></img></a>'.'</td>'.
+                    '<td>'.'<a href = \'suppression.php?id='.$dataMedecin[0].'&type=medecin\'><img src="Images/supprimer.png" alt=""width=30px></img></a>'.'</td>'.'</tr>';
+        }
+        $table =$table . '</tbody></table></div>';
+    } else {
+        $nombreLignes = '<div class="nombre_lignes" style="color: red;"><strong>Aucun</strong> médecin trouvé</div>';
+    }
 ?>
 <!DOCTYPE HTML>
 <html>
@@ -50,50 +92,7 @@
                     </a>
                 </div>
             </form>
-            </div>
-                <?php
-                    // Début de la requête, on sélectionne tous les usages et leur potentiel médecin référent
-                    $reqMedecins = ' SELECT * FROM Medecin';
-                    
-                    // Si un nom et/ou un prénom ont été saisis
-                    $arguments = array();
-                    if (isset($_POST["valider"])) {
-                        $nom = $_POST["nom"];
-                        $prenom = $_POST["prenom"];
-                        $reqMedecins = $reqMedecins . " WHERE lower(nom) LIKE lower(?)
-                                                        AND lower(prenom) LIKE lower(?)";
-                        $arguments = ["%$nom%", "%$prenom%"];
-                    } 
-                    $stmt = $pdo->prepare($reqMedecins);
-                    if ($stmt == false) { echo "Erreur lors d'un prepare statement : " . $stmt->errorInfo(); }
-
-                    // On execute la requête 
-                    if ($stmt->execute($arguments)) {
-                        // On affiche toutes les lignes renvoyées ou un message si rien n'a été trouvé
-                        if ($stmt->rowCount() > 0){
-                            echo '<div class="nombre_lignes"><strong>'.$stmt->rowCount().'</strong> médecin(s) trouvé(s)</div>';
-                            echo '<table id="table_affichage">
-                                    <thead>
-                                        <tr>
-                                            <th onclick="sortTable(0)">Civilite </th>
-                                            <th onclick="sortTable(1)">Nom </th>
-                                            <th onclick="sortTable(2)">Prenom </th>
-                                        </tr>
-                                    </thead>';
-                            while ($dataMedecin = $stmt->fetch()){
-                                echo '<tr><td>'.$dataMedecin['civilite'].'</td>'. 
-                                        '<td>'.$dataMedecin['nom'].'</td>'.
-                                        '<td>'.$dataMedecin['prenom'].'</td>'.                    
-                                        '<td>'.'<a href = \'modificationMedecin.php?idMedecin='.$dataMedecin[0].'\'><img src="Images/modifier.png" alt=""width=30px></img></a>'.'</td>'.
-                                        '<td>'.'<a href = \'suppression.php?id='.$dataMedecin[0].'&type=medecin\'><img src="Images/supprimer.png" alt=""width=30px></img></a>'.'</td>'.'</tr>';
-                            }
-                        } else {
-                            echo '<div class="nombre_lignes" style="color: red;"><strong>Aucun</strong> médecin trouvé</div>';
-                        }
-                    } else {
-                        echo "Erreur lors d'un execute statement : " . $stmt->errorInfo();
-                    }
-                    ?>
+            <?php echo $nombreLignes; if (!empty($table)) { echo $table; } ?>
         </div>
     </main>
     <!-- Script pour trier une table en cliquant sur une colonne -->

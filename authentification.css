@@ -1,0 +1,42 @@
+body{
+    background-color: rgb(239, 239, 239);
+    display: flex;
+}
+
+#login-container{
+    background-color: white;
+    box-shadow: 0px 10px 34px -15px rgba(0, 0, 0, 0.24);
+    margin: auto;
+    margin-top:100px;
+    width:40%;
+    min-width: 160px;
+    border-radius: 20px;
+    padding: 50px 50px 50px 50px;
+}
+
+#login-menu{
+    margin: auto;
+    margin-top: 10%;
+    background-color: white;
+    padding: 50px 50px 50px 50px;
+    border-radius: 20px;
+
+}
+
+#login-body form{
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+}
+
+#login-body form *{
+    padding: 5px;
+    margin-bottom: 10px;
+}
+
+
+
+#submitButton{
+    background-color: white;
+    border: 1px solid grey;
+}

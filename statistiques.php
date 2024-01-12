@@ -1,30 +1,42 @@
 <?php session_start();
-    
-
+    require('fonctions.php');
+    verifierAuthentification();
+    $pdo = creerConnexion();
 ?>
 <!DOCTYPE HTML>
 <html>
 
 <head>
     <meta charset="utf-8" />
+    <link rel="stylesheet" href="header.css">
     <link rel="stylesheet" href="style.css">
     <title> Statistiques </title>
 </head>
 <body>
-    <style>
-        table, th, td{
-            border : solid 1px black;
-            border-collapse: collapse;
-            padding: 15px;
-        }
-    </style>
-    <h1> Parcourir </h1>
+    <header id="menu_navigation">
+        <div id="logo_site">
+            <a href="accueil.html"><img src="Images/logo.png" width="250"></a>
+        </div>
+        <nav id="navigation">
+            <label for="hamburger_defiler" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </label>
+            <input class="defiler" type="checkbox" id="hamburger_defiler" role="button" aria-pressed="true">
+            <ul class="headings">
+                <li><a class="lien_header" href="affichageUsagers.php">Usagers</a></li>
+                <li><a class="lien_header" href="affichageMedecins.php">Médecins</a></li>
+                <li><a class="lien_header" href="affichageConsultations.php">Consultations</a></li>
+                <li><a class="lien_header" href="statistiques.php">Statistiques</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <main class="main_affichage">
+    <h1> Les statistiques </h1>
     <?php
-        try {
-            $pdo = new PDO('mysql:host=localhost;dbname=cabinetmed;charset=utf8', 'root', '');
-        } catch (Exception $e) {
-            echo ("Erreur ".$e);
-        }
+        creerConnexion();
 
         $reqHommes = 'SELECT
                         SUM(CASE WHEN civilite = \'M\' AND DATE_FORMAT(FROM_DAYS(DATEDIFF(NOW(), dateNaissance)), \'%Y\') < 25 THEN 1 ELSE 0 END) AS hommesMoins25,
@@ -84,6 +96,7 @@
         }
     ?>
     </tbody></table>
+    </main>
     <!-- Script pour trier une table en cliquant sur une colonne -->
     <script src="tri-tableau.js"></script>
 </body>

@@ -291,9 +291,13 @@ input[type="radio"] {
     border-radius: 4px;
 }
 
+.conteneur_table_affichage{
+    overflow-x: scroll;
+}
+
 #table_affichage {
     border-collapse: collapse;
-    width: 100%;
+    min-width: 100%;
 }
 
 #table_affichage th {

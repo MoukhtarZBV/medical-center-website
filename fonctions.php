@@ -8,7 +8,7 @@
     function creerConnexion(){
         $pdo = null;
         try {
-            $pdo = new PDO('mysql:host=localhost;dbname=id21781824_cabinet;charset=utf8', 'id21781824_rsp4626a', 'Pizza4Frangipane_');
+            $pdo = new PDO('mysql:host=localhost;dbname=cabinetmed;charset=utf8', 'root', '');
         } catch (Exception $e) {
             echo ("Erreur ".$e);
             exit();
@@ -28,12 +28,41 @@
         }
     }
 
-    function creerComboboxUsagers($pdo, $idUsager) {
+    function formaterDate($date){
+        $elementsDate = explode('-', $date);
+        $dateFormatee = $elementsDate[2] . '/' . $elementsDate[1] . '/' . $elementsDate[0];
+        return $dateFormatee;
+    }
+
+    function consultationsChevauchantes($heureDebutC1, $dureeC1, $heureDebutC2, $dureeC2) {
+        // On crée les dates de début et de fin des deux consultations
+        $debutC1 = DateTime::createFromFormat('H:i', $heureDebutC1);
+        $finC1 = clone $debutC1;
+        list($hours, $minutes) = explode(':', $dureeC1);
+        $finC1->add(new DateInterval("PT{$hours}H{$minutes}M"));
+
+        $debutC2 = DateTime::createFromFormat('H:i', $heureDebutC2);
+        $finC2 = clone $debutC2;
+        list($hours, $minutes) = explode(':', $dureeC2);
+        $finC2->add(new DateInterval("PT{$hours}H{$minutes}M"));
+
+        // On vérifie si les consultations se chevauchent
+        if (($debutC1 >= $debutC2 AND $debutC1 < $finC2) ||
+            ($finC1 > $debutC2 AND $finC1 <= $finC2) || 
+            ($debutC2 >= $debutC1 AND $debutC2 < $finC1)) {
+                return true;
+        }
+        return false;
+    }
+
+    function creerComboboxUsagers($pdo, $idUsager, $message) {
         $stmt = $pdo->prepare("SELECT idUsager, numeroSecuriteSociale, civilite, nom, prenom FROM usager ORDER BY nom, prenom ASC");
         verifierPrepare($stmt);
         verifierExecute($stmt->execute());
-        echo '<select name="idUsager">
-        <option value="">Tous les usagers</option>';
+        echo '<select name="idUsager">';
+        if ($message != null){
+            echo '<option value="">' . $message . '</option>';
+        }
         while ($dataUsager = $stmt->fetch()) {
             $id = $dataUsager["idUsager"];
             $titre = str_pad($dataUsager["civilite"] . '. ', 5, ' ') . $dataUsager["nom"] . ' ' . $dataUsager["prenom"] . ' (' . $dataUsager["numeroSecuriteSociale"] . ')';
@@ -47,8 +76,10 @@
         $stmt = $pdo->prepare("SELECT idMedecin, civilite, nom, prenom FROM medecin");
         verifierPrepare($stmt);
         verifierExecute($stmt->execute());
-        echo '<select name="idMedecin">
-        <option value="">'.$message.'</option>';
+        echo '<select name="idMedecin">';
+        if ($message != null){
+            echo '<option value="">' . $message . '</option>';
+        }
         while ($dataMedecin = $stmt->fetch()) {
             $id = $dataMedecin["idMedecin"];
             $titre = $dataMedecin["civilite"] . '. ' . $dataMedecin["nom"] . ' ' . $dataMedecin["prenom"];
