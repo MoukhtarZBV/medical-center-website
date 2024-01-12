@@ -1,62 +1,17 @@
-<!DOCTYPE HTML>
-<html>
+<?php session_start();
+    require('fonctions.php');
+    verifierAuthentification();
+    $pdo = creerConnexion();
 
-<head>
-    <meta charset="utf-8">
-    <title> Ajout d'un médecin </title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="header.css">
-</head>
-
-<body id='body_fond'>
-
-    <header id="menu_navigation">
-        <div id="logo_site">
-            <img src="delete.png" width="50">
-        </div>
-        <nav id="navigation">
-            <label for="hamburger_defiler" id="hamburger">
-                <span></span>
-                <span></span>
-                <span></span>
-            </label>
-            <input class="defiler" type="checkbox" id="hamburger_defiler" role="button" aria-pressed="true">
-            <ul class="headings">
-                <li><a class="lien_header" href="Accueil.html">Accueil</a></li>
-                <li class="deroulant"><a class="lien_header">Ajouter</a>
-                    <ul class="liste_deroulante">
-                        <li><a class="lien_header" href="creationusager.php">Un usager</a></li>
-                        <li><a class="lien_header" href="creationmedecin.php">Un médecin</a></li>
-                        <li><a class="lien_header" href="creationconsultation.php">Une consultation</a></li>
-                    </ul>
-                </li>
-                <li class="deroulant"><a class="lien_header">Consulter</a>
-                    <ul class="liste_deroulante">
-                        <li><a class="lien_header" href="Competence1.html">Les usagers</a></li>
-                        <li><a class="lien_header" href="Competence2.html">Les médecins</a></li>
-                        <li><a class="lien_header" href="Competence3.html">Les consultations</a></li>
-                    </ul>
-                </li>
-                <li><a class="lien_header" href="Contact.html">Statistiques</a></li>
-            </ul>
-        </nav>
-    </header>
-
-    <?php
+    $popup = '';
     if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["Confirmer"])) {
-
-        try {
-            $pdo = new PDO("mysql:host=localhost;dbname=cabinetmed", 'root', '');
-        } catch (Exception $e) {
-            echo ("Erreur : " . $e);
-        }
-
         $civ = $_POST['civ'];
         $nom = $_POST['nom'];
         $prenom = $_POST['prenom'];
 
         $stmt = $pdo->prepare("INSERT INTO medecin (civilite, nom, prenom)
                  VALUES (?,?,?)");
+        verifierPrepare($stmt);
         $stmt->bindParam(1, $civ, PDO::PARAM_STR);
         $stmt->bindParam(2, $nom, PDO::PARAM_STR);
         $stmt->bindParam(3, $prenom, PDO::PARAM_STR);
@@ -64,7 +19,7 @@
         $message = '';
         $classeMessage = '';
         try {
-            $stmt->execute();
+            verifierExecute($stmt->execute());
             $message = 'Le médecin <strong>' . $nom . ' ' . $prenom . '</strong> a été ajouté !';
             $classeMessage = 'succes';
         } catch (PDOException $e) {
@@ -79,11 +34,25 @@
         }
 
         // Affichage de la popup d'erreur ou de succés
-        echo '<div class="popup ' . $classeMessage . '">' .
-            $message .
-            '</div>';
+        if (!empty($message)){
+            $popup = '<div class="popup ' . $classeMessage . '">' . $message .'</div>';
+        }
     }
-    ?>
+?>
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title> Ajout d'un médecin </title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="header.css">
+</head>
+
+<body id='body_fond'>
+    <?php include 'header.html' ?>
+
+    <?php if (!empty($popup)) { echo $popup; } ?>
 
     <div class="titre_formulaire">
         <h1>Ajout d'un médecin</h1>
@@ -117,7 +86,8 @@
             <input type="submit" name="Confirmer" value="Confirmer">
         </div>
     </form>
-
+    <!-- Script pour formater les inputs -->
+    <script src="format-texte-input.js"></script>
 </body>
 
 </html>
