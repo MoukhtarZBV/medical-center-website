@@ -1,111 +1,107 @@
+<?php session_start();
+    require('fonctions.php');
+    require('fonctionsVerifierInputs.php');
+    verifierAuthentification();
+    $pdo = creerConnexion();
+
+    if (!empty($_POST['Confirmer'])) {
+        $civ = $_POST['civ'];
+        $nom = $_POST['nom'];
+        $prenom = $_POST['prenom'];
+
+        $message = '';
+        $classeMessage = '';
+        $popup = '';
+        if (!inputSansEspacesCorrect($nom, TAILLE_NOM)){
+            $message = 'Le nom n\'est pas correctement saisi';
+            $classeMessage = 'erreur';
+        } else if (!inputSansEspacesCorrect($prenom, TAILLE_PRENOM)){
+            $message = 'Le prénom n\'est pas correctement saisi';
+            $classeMessage = 'erreur';
+        } else {
+            $stmt = $pdo->prepare('UPDATE medecin SET nom = ?, prenom = ?, civilite = ? WHERE idMedecin = ?');
+            verifierPrepare($stmt);
+            try {
+                verifierExecute($stmt->execute([$nom, $prenom, $civ, $_GET['idMedecin']]));
+                $message = 'Le médecin <strong>' . $nom . ' ' . $prenom . '</strong> a été modifié !';
+                $classeMessage = 'succes';
+            } catch (PDOException $e) {
+                $codeErreur = $e->getCode();
+                // Si le code vaut 23000, alors la contrainte d'unicité du nom et prénom a été violée
+                if ($codeErreur == '23000') {
+                    $message = 'Le médecin <strong>' . $nom . ' ' . $prenom . '</strong> existe déjà.';
+                } else {
+                    $message = 'Une erreur s\'est produite : ' . $e->getMessage();
+                }
+                $classeMessage = 'erreur';
+            }
+        }
+
+        // Affichage de la popup d'erreur ou de succés
+        if (!empty($message)){
+            $popup = '<div class="popup ' . $classeMessage . '">' . $message .'</div>';
+        }
+    }
+
+    if (isset($_GET['idMedecin'])) {
+        $sql = 'SELECT * FROM medecin WHERE idMedecin = ?';
+        $stmt = $pdo->prepare($sql);
+        verifierPrepare($stmt);
+        verifierExecute($stmt->execute([$_GET['idMedecin']]));
+        $result = $stmt->fetchAll();
+    
+        $civilite = array_column($result, 'civilite')[0];
+        $nom = array_column($result, 'nom')[0];
+        $prenom = array_column($result, 'prenom')[0];
+    }
+?>
 <!DOCTYPE HTML>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <title> Modification d'un médecin </title>
-    </head>
-    <?php
-        try {
-            $pdo = new PDO("mysql:host=localhost;dbname=cabinetmed", 'root', '');
-        } catch (Exception $e) {
-            echo ("Erreur : ".$e);
-        }
-            if (isset($_GET['idMedecin'])){
 
-                $sql = 'SELECT * FROM medecin WHERE idMedecin = '.$_GET['idMedecin'];
-                $stmt = $pdo->prepare($sql);
-                if ($stmt == false){
-                    echo 'ERREUR';
-                }
-                $stmt->execute();
-                $result = $stmt->fetchAll();
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="header.css">
+    <link rel="stylesheet" href="style.css">
+    <title> Modification d'un médecin </title>
+</head>
 
-                $civilite = array_column($result, 'civilite')[0];
-                $nom = array_column($result, 'nom')[0];
-                $prenom = array_column($result, 'prenom')[0];
-            }
+<body id="body_fond">
+    <?php include 'header.html' ?>
 
-            if (isset($_POST['valider'])){
-                $sql = 'UPDATE medecin  SET nom = \''.$_POST['nom'].'\',
-                                            prenom = \''.$_POST['prenom'].'\',
-                                            civilite = \''.$_POST['civilite'].'\'
-                                        WHERE id = \''.$_GET['idMedecin'].'\';';
-                $bdd->query($sql);
-            }
-    ?>
-    <body>
+    <?php if (!empty($popup)) { echo $popup; } ?>
 
-            <h1> Modification d'un usager </h1>
+    <div class="titre_formulaire">
+        <h1> Modification d'un médecin </h1>
+    </div>
 
-            <form action="modificationmedecin.php" method="post">
-                Civilité    <input type="radio" id="civM" name="civ" value="M" <?php if ($civilite == 'M'){ echo 'checked';} ?> />
-                            <label for="civM">M</label>
-                            <input type="radio" id="civMme" name="civ" value="Mme" <?php if ($civilite == 'Mme'){ echo 'checked';} ?> />
-                            <label for="civMme">Mme</label><br><br>
-                Nom <input type="text" name="nom" maxlength=50 value='<?php echo $nom ?>'><br><br>
-                Prénom <input type="text" name="prenom" maxlength=50 value='<?php echo $prenom ?>'><br><br>
-                <input type="submit" name="Valider" value="Confirmer">
-                <input type="reset" name="Vider" value ="Vider">
-            </form>
-
-    </body>
-    <style>
-        body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    padding: 20px;
-}
-
-form {
-    max-width: 400px;
-    margin: 0 auto;
-    background: white;
-    padding: 20px;
-    box-shadow: 2px 5px 10px rgba(0,0,0,0.1);
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-input[type="text"],
-input[type="submit"],
-input[type="reset"] {
-    width: 95%;
-    padding: 10px;
-    margin: 10px 0;
-    border: 1px solid #ddd;
-    box-sizing: border-box;
-    border-radius: 4px;
-}
-
-input[type="submit"],
-input[type="reset"] {
-    width: auto;
-    background-color: #5cb85c;
-    color: white;
-    cursor: pointer;
-    border: none;
-    transition: background-color 0.3s;
-}
-
-input[type="reset"] {
-    background-color: #f0ad4e;
-}
-
-input[type="submit"]:hover,
-input[type="reset"]:hover {
-    opacity: 0.9;
-}
-
-input[type="radio"] {
-    margin-right: 5px;
-}
-
-label {
-    margin-right: 15px;
-}
-
-label, input {
-    cursor: pointer;
-}
-</style>
+    <form class="formulaire" action="modificationMedecin.php?idMedecin=<?php echo $_GET['idMedecin']; ?>" method="post">
+        <div class="conteneur_civilite">
+            Civilité
+            <div class="choix_civilite">
+                <input type="radio" id="civM" name="civ" value="M" <?php if ($civilite == 'M') { echo 'checked'; } ?>/>
+                <label for="civM">M</label>
+                <img src="Images/homme.png" alt="Homme" class="image_civilite">
+            </div>
+            <div class="choix_civilite">
+                <input type="radio" id="civMme" name="civ" value="Mme" <?php if ($civilite == 'Mme') { echo 'checked'; } ?> />
+                <label for="civMme">Mme</label>
+                <img src="Images/femme.png" alt="Femme" class="image_civilite">
+            </div>
+        </div>
+        <div class="ligne_formulaire">
+            <div class="colonne_formulaire moitie">
+                Nom <input type="text" name="nom" value="<?php echo $nom ?>" maxlength=50 required>
+            </div>
+            <div class="colonne_formulaire moitie">
+                Prénom <input type="text" name="prenom" value="<?php echo $prenom ?>" maxlength=50 required>
+            </div>
+        </div>
+        <div class="conteneur_boutons">
+            <input type="reset" name="Vider" value="Vider">
+            <input type="submit" name="Confirmer" value="Confirmer">
+        </div>
+    </form>
+    <!-- Script pour formater les inputs -->
+    <script src="format-texte-input.js"></script>
+</body>
 </html>
