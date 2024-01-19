@@ -83,25 +83,8 @@
 </head>
 
 <body>
-    <header id="menu_navigation">
-        <div id="logo_site">
-            <a href="accueil.html"><img src="Images/logo.png" width="250"></a>
-        </div>
-        <nav id="navigation">
-            <label for="hamburger_defiler" id="hamburger">
-                <span></span>
-                <span></span>
-                <span></span>
-            </label>
-            <input class="defiler" type="checkbox" id="hamburger_defiler" role="button" aria-pressed="true">
-            <ul class="headings">
-                <li><a class="lien_header" href="affichageUsagers.php">Usagers</a></li>
-                <li><a class="lien_header" href="affichageMedecins.php">Médecins</a></li>
-                <li><a class="lien_header" href="affichageConsultations.php">Consultations</a></li>
-                <li><a class="lien_header" href="statistiques.php">Statistiques</a></li>
-            </ul>
-        </nav>
-    </header>
+    <?php include 'header.html' ?>
+    
     <main class="main_affichage">
         <h1> Liste des consultations </h1>
 
@@ -126,5 +109,4 @@
         <?php echo $nombreLignes; if (!empty($table)) { echo $table; } ?>
     </main>
 </body>
-
 </html>

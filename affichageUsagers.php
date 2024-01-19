@@ -9,16 +9,14 @@
     LEFT JOIN medecin m ON u.medecinReferent = m.idMedecin';
 
     $tropDeCriteres = false;
+    $stmt = null;
     // Si des mots-clés/critères on été saisis
     if (!empty($_POST["criteres"])) {
         // On sépare les critères saisis avec les espaces
-        $listeCriteres = preg_split('/\s+/', $_POST['criteres']);
+        $criteres = trim($_POST['criteres']);
+        $listeCriteres = explode(' ', $criteres);
 
         $nombreCriteres = count($listeCriteres);
-        // Si le dernier critère est simplement un espace, on retire un au nombre de critères
-        if (!empty($listeCriteres[count($listeCriteres) - 1])) {
-            $nombreCriteres--;
-        }
 
         // S'il y a trop de critères, on annule la recherche
         if ($nombreCriteres > 5){
@@ -27,7 +25,7 @@
 
         // On vérifie, pour chacune des colonnes, si elle correspond à un des critère
         $listeColonnes = array('u.civilite', 'u.nom', 'u.prenom', 'u.ville', 'u.codePostal');
-        if ($nombreCriteres > 0 && !$tropDeCriteres) {
+        if (!$tropDeCriteres) {
             $reqUsagers = $reqUsagers . ' WHERE ';
             for ($i = 0; $i < count($listeColonnes); $i++) {
                 for ($j = 0; $j < $nombreCriteres; $j++) {
@@ -65,16 +63,16 @@
                     <table id="table_affichage">
                     <thead>
                         <tr>
-                            <th onclick="sortTable(0)">Civilite </th>
-                            <th onclick="sortTable(1)">Nom </th>
-                            <th onclick="sortTable(2)">Prenom </th>
-                            <th onclick="sortTable(3)">Adresse </th>
-                            <th onclick="sortTable(4)">Code postal </th>
-                            <th onclick="sortTable(5)">Ville </th>
-                            <th onclick="sortTable(6)">Numéro sécurité sociale </th>
-                            <th onclick="sortTable(7)">Date de naissance </th>
-                            <th onclick="sortTable(8)">Ville de naissance </th>
-                            <th onclick="sortTable(9)">Médecin référent </th>
+                            <th>Civilite </th>
+                            <th>Nom </th>
+                            <th>Prenom </th>
+                            <th>Adresse </th>
+                            <th>Ville </th>
+                            <th>Code postal </th>
+                            <th>Numéro sécurité sociale </th>
+                            <th>Date de naissance </th>
+                            <th>Ville de naissance </th>
+                            <th>Médecin référent </th>
                         </tr>
                     </thead><tbody>';
             while ($dataUsager = $stmt->fetch()){
@@ -105,29 +103,11 @@
     <meta charset="utf-8" />
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="header.css">
-    <title> Liste des usagers </title>
+    <title> Usagers </title>
 </head>
 
 <body>
-    <header id="menu_navigation">
-        <div id="logo_site">
-            <a href="accueil.html"><img src="Images/logo.png" width="250"></a>
-        </div>
-        <nav id="navigation">
-            <label for="hamburger_defiler" id="hamburger">
-                <span></span>
-                <span></span>
-                <span></span>
-            </label>
-            <input class="defiler" type="checkbox" id="hamburger_defiler" role="button" aria-pressed="true">
-            <ul class="headings">
-                <li><a class="lien_header" href="affichageUsagers.php">Usagers</a></li>
-                <li><a class="lien_header" href="affichageMedecins.php">Médecins</a></li>
-                <li><a class="lien_header" href="affichageConsultations.php">Consultations</a></li>
-                <li><a class="lien_header" href="statistiques.php">Statistiques</a></li>
-            </ul>
-        </nav>
-    </header>
+    <?php include 'header.html' ?>
     
     <main class="main_affichage">
         <h1> Liste des usagers </h1>
@@ -142,8 +122,6 @@
             <?php echo $nombreLignes; if (!empty($table)) { echo $table; } ?>
         </div>
     </main>
-    <!-- Script pour trier une table en cliquant sur une colonne -->
-    <script src="tri-tableau.js"></script>
     <!-- Script pour formater les inputs -->
     <script src="format-texte-input.js"></script>
 </body>

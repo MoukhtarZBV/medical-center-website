@@ -28,9 +28,9 @@
                 <table id="table_affichage">
                 <thead>
                     <tr>
-                        <th onclick="sortTable(0)">Civilite </th>
-                        <th onclick="sortTable(1)">Nom </th>
-                        <th onclick="sortTable(2)">Prenom </th>
+                        <th>Civilite </th>
+                        <th>Nom </th>
+                        <th>Prenom </th>
                     </tr>
                 </thead><tbody>';
         while ($dataMedecin = $stmt->fetch()){
@@ -45,7 +45,7 @@
         $nombreLignes = '<div class="nombre_lignes" style="color: red;"><strong>Aucun</strong> médecin trouvé</div>';
     }
 ?>
-<!DOCTYPE HTML>
+<!DOCTYPE HTML> 
 <html>
 
 <head>
@@ -55,25 +55,7 @@
     <title> Médecins </title>
 </head>
 <body>
-    <header id="menu_navigation">
-        <div id="logo_site">
-            <a href="accueil.html"><img src="Images/logo.png" width="250"></a>
-        </div>
-        <nav id="navigation">
-            <label for="hamburger_defiler" id="hamburger">
-                <span></span>
-                <span></span>
-                <span></span>
-            </label>
-            <input class="defiler" type="checkbox" id="hamburger_defiler" role="button" aria-pressed="true">
-            <ul class="headings">
-                <li><a class="lien_header" href="affichageUsagers.php">Usagers</a></li>
-                <li><a class="lien_header" href="affichageMedecins.php">Médecins</a></li>
-                <li><a class="lien_header" href="affichageConsultations.php">Consultations</a></li>
-                <li><a class="lien_header" href="statistiques.php">Statistiques</a></li>
-            </ul>
-        </nav>
-    </header>
+    <?php include 'header.html' ?>
     
     <main class="main_affichage">
         <h1> Liste des médecins </h1>
@@ -95,8 +77,6 @@
             <?php echo $nombreLignes; if (!empty($table)) { echo $table; } ?>
         </div>
     </main>
-    <!-- Script pour trier une table en cliquant sur une colonne -->
-    <script src="tri-tableau.js"></script>
 </body>
 
 </html>
