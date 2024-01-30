@@ -10,7 +10,6 @@
         $popup = '';
         if (isset($_POST["Confirmer"])) {
             $today = gmdate('Y-m-d', time());
-            $idUsager = $_POST['idUsager'];
             $date = $_POST['date'];
             $heure = substr($_POST['heureD'], 0, 5);
             $duree = substr($_POST['duree'], 0, 5);
@@ -44,17 +43,15 @@
                 $classeMessage = '';
                 if (!$consulationsChevauchantes) {
                     $stmt = $pdo->prepare(" UPDATE Consultation
-                                            SET idUsager = ?, heureDebut = ?, duree = ?
+                                            SET heureDebut = ?, duree = ?
                                             WHERE idMedecin = ?
                                             AND dateConsultation = ?
                                             AND heureDebut = ?");
                     verifierPrepare($stmt);
-                    verifierExecute($stmt->execute([$idUsager, $heure, $duree, $cleConsultation[0], $cleConsultation[1], $cleConsultation[2]]));
+                    verifierExecute($stmt->execute([$heure, $duree, $cleConsultation[0], $cleConsultation[1], $cleConsultation[2]]));
 
-                    $elementsDate = explode('-', $date);
-                    $dateFormatee = $elementsDate[2] . '/' . $elementsDate[1] . '/' . $elementsDate[0];
-                    $usager = $pdo->query("SELECT CONCAT(civilite, '. ', nom, ' ', prenom) FROM Usager WHERE idUsager = " . $idUsager)->fetchColumn();
-                    $message = 'La consultation a été modifiée ! Elle a lieu le <strong>' . $dateFormatee . '</strong> à <strong>' . str_replace(':', 'H', $heure) . '</strong> pour le patient <strong>' . $usager . '</strong>';
+                    $dateFormatee = formaterDate($date);
+                    $message = 'La consultation a été modifiée ! Elle a lieu le <strong>' . $dateFormatee . '</strong> à <strong>' . str_replace(':', 'H', $heure) . '.';
                     $classeMessage = 'succes';
                     $cleConsultation[2] = $heure;
                 } else {
@@ -88,8 +85,7 @@
             
         $resultat = $stmt->fetch();
         $medecin = $resultat["civM"] . '. ' . $resultat["nomM"] . ' ' . $resultat["prenomM"];
-        $usagerActuel = $resultat["civU"] . '. ' . $resultat["nomU"] . ' ' . $resultat["prenomU"] . ' (' . $resultat["numeroSecuriteSociale"] . ')';
-        $idUsagerActuel = $resultat["idUsager"];
+        $usager = $resultat["civU"] . '. ' . $resultat["nomU"] . ' ' . $resultat["prenomU"] . ' (' . $resultat["numeroSecuriteSociale"] . ')';
         $date = $resultat["dateConsultation"];
         $heure = $resultat["heureDebut"];
         $duree = $resultat["duree"];
@@ -103,7 +99,7 @@
     <meta charset="utf-8">
     <link rel="stylesheet" href="header.css">
     <link rel="stylesheet" href="style.css">
-    <title> Planification de consultation </title>
+    <title> Modification d'une consultation </title>
 </head>
 
 <body id="body_fond">
@@ -116,12 +112,16 @@
     </div>
 
     <form class="formulaire" action="modificationConsultation.php?id=<?php echo $id ?>" method="post">
-        <?php
-        echo 'Médecin ';
-        creerComboboxMedecins($pdo, null, null);
-        echo 'Usager ';
-        creerComboboxUsagers($pdo, null, null); 
-        ?>
+        <div class="ligne_formulaire">
+            <div class="input_lecture">
+                Médecin <input type="text" name="medecin" value="<?php echo $medecin ?>" readonly>
+            </div>
+        </div>
+        <div class="ligne_formulaire">
+            <div class="input_lecture">
+                Médecin <input type="text" name="usager" value="<?php echo $usager ?>" readonly>
+            </div>
+        </div>
         <div class="ligne_formulaire temps_consultation">
             <div class="colonne_formulaire moitie">
                 Date de consultation <input type="date" name="date" value="<?php echo $date ?>" min="<?php echo $today ?>" readonly>

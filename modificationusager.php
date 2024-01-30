@@ -1,17 +1,58 @@
 <?php session_start();
     require('fonctions.php');
+    require('fonctionsVerifierInputs.php');
     verifierAuthentification();
     $pdo = creerConnexion();
 
     if (!empty($_POST['Confirmer'])) {
-        $stmt = $pdo->prepare('UPDATE usager SET nom = ?, prenom = ?, civilite = ?, adresse = ?, codePostal = ?, 
-                                                ville = ?, numeroSecuriteSociale = ?, dateNaissance = ?, lieuNaissance = ?, medecinReferent = ?
-                                            WHERE idUsager = ?');
-        verifierPrepare($stmt);
-        $medecinReferent = empty($_POST['idMedecin']) ? null : $_POST['idMedecin'];
-        verifierExecute($stmt->execute([$_POST['nom'], $_POST['prenom'], $_POST['civ'], $_POST['adr'], $_POST['cp'], 
-                                        $_POST['ville'], $_POST['nss'], $_POST['date'],
-                                        $_POST['lieu'], $medecinReferent, $_GET['idUsager']]));
+        $civ = $_POST['civ'];
+        $nom = $_POST['nom'];
+        $prenom = $_POST['prenom'];
+        $adr = $_POST['adr'];
+        $ville = $_POST['ville'];
+        $cp = $_POST['cp'];
+        $nss = $_POST['nss'];
+        $date = $_POST['date'];
+        $lieu = $_POST['lieu'];
+        $idMed = !empty($_POST['idMedecin']) ? $_POST['idMedecin'] : null;
+
+        $message = '';
+        $classeMessage = '';
+        if (!inputSansEspacesCorrect($nom, TAILLE_NOM)){
+            $message = 'Le nom n\'est pas correctement saisi';
+            $classeMessage = 'erreur';
+        } else if (!inputSansEspacesCorrect($prenom, TAILLE_PRENOM)){
+            $message = 'Le prénom n\'est pas correctement saisi';
+            $classeMessage = 'erreur';
+        } else if (!inputAvecUnEspaceCorrect($adr, TAILLE_ADRESSE)){
+            $message = 'L\'adresse n\'est pas correctement saisie';
+            $classeMessage = 'erreur';
+        } else if (!inputSansEspacesCorrect($ville, TAILLE_VILLE)){
+            $message = 'La ville n\'est pas correctement saisie';
+            $classeMessage = 'erreur';
+        } else if (!inputChiffresUniquementCorrect($cp, TAILLE_CODE_POSTAL) || !tailleInputRespectee($cp, TAILLE_CODE_POSTAL)){
+            $message = 'Le code postal n\'est pas correctement saisi';
+            $classeMessage = 'erreur';
+        } else if (!inputChiffresUniquementCorrect($nss, TAILLE_NUMERO_SECU) || !tailleInputRespectee($nss, TAILLE_NUMERO_SECU)){
+            $message = 'Le numéro de sécurité sociale n\'est pas correctement saisi';
+            $classeMessage = 'erreur';
+        } else if (!inputSansEspacesCorrect($lieu, TAILLE_VILLE)){
+            $message = 'La ville de naissance n\'est pas correctement saisie';
+            $classeMessage = 'erreur';
+        } else {
+            $stmt = $pdo->prepare('UPDATE usager SET nom = ?, prenom = ?, civilite = ?, adresse = ?, codePostal = ?, 
+                                                    ville = ?, numeroSecuriteSociale = ?, dateNaissance = ?, lieuNaissance = ?, medecinReferent = ?
+                                                WHERE idUsager = ?');
+            verifierPrepare($stmt);
+            verifierExecute($stmt->execute([$nom, $prenom, $civ, $adr, $cp, $ville, $nss, $date, $lieu, $idMed, $_GET['idUsager']]));
+            $message = 'L\'usager <strong>'.$nom.' '.$prenom.'</strong> a été mis à jour !';
+            $classeMessage = 'succes';
+        }
+
+        // Affichage de la popup d'erreur ou de succés
+        if (!empty($message)){
+            $popup = '<div class="popup ' . $classeMessage . '">' . $message .'</div>';
+        }
     }
     
     if (isset($_GET['idUsager'])) {
@@ -40,11 +81,13 @@
     <meta charset="utf-8">
     <link rel="stylesheet" href="header.css">
     <link rel="stylesheet" href="style.css">
-    <title> Modification d'usager </title>
+    <title> Modification d'un usager </title>
 </head>
 
 <body id="body_fond">
     <?php include 'header.html' ?>
+
+    <?php if (!empty($popup)) { echo $popup; } ?>
 
     <div class="titre_formulaire">
         <h1> Modification d'un usager </h1>
@@ -82,12 +125,12 @@
                 Ville <input type="text" name="ville" value="<?php echo $ville ?>" maxlength=50 required>
             </div>
             <div class="colonne_formulaire petit">
-                Code postal <input type="text" name="cp" value="<?php echo $codePostal ?>" minlength=5 maxlength=5 oninput="chiffresUniquement(event)" required>
+                Code postal <input type="text" name="cp" value="<?php echo $codePostal ?>" minlength=5 maxlength=5 class="chiffres_uniquement" required>
             </div>
         </div>
         <div class="ligne_formulaire">
             <div class="colonne_formulaire moitie">
-                N° Sécurité sociale <input type="text" name="nss" value="<?php echo $numeroSecuriteSociale ?>" minlength=15 maxlength=15 oninput="chiffresUniquement(event)" required>
+                N° Sécurité sociale <input type="text" name="nss" value="<?php echo $numeroSecuriteSociale ?>" minlength=15 maxlength=15 class="chiffres_uniquement" required>
             </div>
         </div>
         <div class="ligne_formulaire">
@@ -105,6 +148,8 @@
             <input type="submit" name="Confirmer" value="Confirmer">
         </div>
     </form>
+    <!-- Script pour formater les inputs -->
+    <script src="format-texte-input.js"></script>
 </body>
 
 </html>
