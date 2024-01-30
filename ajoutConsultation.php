@@ -1,41 +1,54 @@
 <?php session_start();
     require('fonctions.php');
+    require('fonctionsVerifierInputs.php');
     verifierAuthentification();
     $pdo = creerConnexion();
 
     $popup = '';
     if (!empty($_POST["Confirmer"])) {
+        $today = gmdate('Y-m-d', time());
         $idMed = $_POST['idMedecin'];
         $idUsager = $_POST['idUsager'];
         $date = $_POST['date'];
         $heure = $_POST['heureD'];
         $duree = $_POST['duree'];
 
-        $stmt = $pdo->prepare("SELECT heureDebut, duree FROM Consultation c, Medecin m WHERE c.idMedecin = m.idMedecin AND m.idMedecin = ? AND dateConsultation = ?");
-        verifierPrepare($stmt);
-        verifierExecute($stmt->execute(["$idMed", "$date"]));
-
-        $consulationsChevauchantes = false;
-        while (!$consulationsChevauchantes && $consultation = $stmt->fetch()){
-            if (consultationsChevauchantes($heure, $duree, substr($consultation['heureDebut'], 0, 5), substr($consultation['duree'], 0, 5))) {
-                $consulationsChevauchantes = true;
-            }
-        }
-
         $message = '';
         $classeMessage = '';
-        if (!$consulationsChevauchantes) {
-            $stmt = $pdo->prepare("INSERT INTO consultation VALUES (?,?,?,?,?)");
-            verifierPrepare($stmt);
-            verifierExecute($stmt->execute(["$idMed", "$date", "$heure", "$duree", "$idUsager"]));
-                
-            $dateFormatee = formaterDate($date);
-            $nomMedecin = $pdo->query("SELECT CONCAT(' ', nom, ' ', prenom) FROM Medecin WHERE idMedecin = " . $idMed)->fetchColumn();
-            $message = 'La consultation du <strong>' . $dateFormatee . '</strong> à <strong>' . str_replace(':', 'H', $heure) . '</strong> pour le médecin <strong>'. $nomMedecin . '</strong> a été ajoutée !';
-            $classeMessage = 'succes';
-        } else {
-            $message = 'La consultation chevauche avec un autre créneau pour ce médecin';
+        if (!dateApresLe($date, $today)) {
+            $message = 'La date de la consultation ne peut pas être infèrieure à la date du jour';
             $classeMessage = 'erreur';
+        } else if (!heureApres8HeureAvant20Heure($heure)) {
+            $message = 'La consultation doit avoir lieu entre 8 heures et 20 heures';
+            $classeMessage = 'erreur';
+        } else if (!dureeSuperieure15MinutesInferieur60Minutes($duree)) {
+            $message = 'La consultation doit durer entre 5 minutes et une heure';
+            $classeMessage = 'erreur';
+        } else {
+            $stmt = $pdo->prepare("SELECT heureDebut, duree FROM Consultation c, Medecin m WHERE c.idMedecin = m.idMedecin AND m.idMedecin = ? AND dateConsultation = ?");
+            verifierPrepare($stmt);
+            verifierExecute($stmt->execute(["$idMed", "$date"]));
+
+            $consulationsChevauchantes = false;
+            while (!$consulationsChevauchantes && $consultation = $stmt->fetch()){
+                if (consultationsChevauchantes($heure, $duree, substr($consultation['heureDebut'], 0, 5), substr($consultation['duree'], 0, 5))) {
+                    $consulationsChevauchantes = true;
+                }
+            }
+
+            if (!$consulationsChevauchantes) {
+                $stmt = $pdo->prepare("INSERT INTO consultation VALUES (?,?,?,?,?)");
+                verifierPrepare($stmt);
+                verifierExecute($stmt->execute(["$idMed", "$date", "$heure", "$duree", "$idUsager"]));
+                    
+                $dateFormatee = formaterDate($date);
+                $nomMedecin = $pdo->query("SELECT CONCAT(' ', nom, ' ', prenom) FROM Medecin WHERE idMedecin = " . $idMed)->fetchColumn();
+                $message = 'La consultation du <strong>' . $dateFormatee . '</strong> à <strong>' . str_replace(':', 'H', $heure) . '</strong> pour le médecin <strong>'. $nomMedecin . '</strong> a été ajoutée !';
+                $classeMessage = 'succes';
+            } else {
+                $message = 'La consultation chevauche avec un autre créneau pour ce médecin';
+                $classeMessage = 'erreur';
+            }
         }
 
         // Affichage de la popup d'erreur ou de succés
@@ -51,7 +64,7 @@
     <meta charset="utf-8">
     <link rel="stylesheet" href="header.css">
     <link rel="stylesheet" href="style.css">
-    <title> Planification de consultation </title>
+    <title> Planification d'une consultation </title>
 </head>
 
 <body id="body_fond">
@@ -66,7 +79,6 @@
     <form class="formulaire" action="ajoutConsultation.php" method="post">
 
         <?php
-        $today = gmdate('Y-m-d', time());
         echo 'Médecin ';
         creerComboboxMedecins($pdo, null, null);
         echo 'Usager ';
@@ -88,5 +100,7 @@
             <input type="submit" name="Confirmer" value="Confirmer">
         </div>
     </form>
+    <!-- Script pour sélectionner automatiquement le médecin référent -->
+    <script src="selection-medecin-ref.js"></script>
 </body>
 </html>

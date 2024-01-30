@@ -1,5 +1,6 @@
 <?php session_start();
     require('fonctions.php');
+    require('fonctionsVerifierInputs.php');
     verifierAuthentification();
     $pdo = creerConnexion();
 
@@ -9,28 +10,32 @@
         $nom = $_POST['nom'];
         $prenom = $_POST['prenom'];
 
-        $stmt = $pdo->prepare("INSERT INTO medecin (civilite, nom, prenom)
-                 VALUES (?,?,?)");
-        verifierPrepare($stmt);
-        $stmt->bindParam(1, $civ, PDO::PARAM_STR);
-        $stmt->bindParam(2, $nom, PDO::PARAM_STR);
-        $stmt->bindParam(3, $prenom, PDO::PARAM_STR);
-
         $message = '';
         $classeMessage = '';
-        try {
-            verifierExecute($stmt->execute());
-            $message = 'Le médecin <strong>' . $nom . ' ' . $prenom . '</strong> a été ajouté !';
-            $classeMessage = 'succes';
-        } catch (PDOException $e) {
-            $codeErreur = $e->getCode();
-            // Si le code vaut 23000, alors la contrainte d'unicité du nom et prénom a été violée
-            if ($codeErreur == '23000') {
-                $message = 'Le médecin <strong>' . $nom . ' ' . $prenom . '</strong> existe déjà.';
-            } else {
-                $message = 'Une erreur s\'est produite : ' . $e->getMessage();
-            }
+        if (!inputSansEspacesCorrect($nom, TAILLE_NOM)){
+            $message = 'Le nom n\'est pas correctement saisi';
             $classeMessage = 'erreur';
+        } else if (!inputSansEspacesCorrect($prenom, TAILLE_PRENOM)){
+            $message = 'Le prénom n\'est pas correctement saisi';
+            $classeMessage = 'erreur';
+        } else {
+            $stmt = $pdo->prepare("INSERT INTO medecin (civilite, nom, prenom)
+            VALUES (?,?,?)");
+            verifierPrepare($stmt);
+            try {
+                verifierExecute($stmt->execute([$civ, $nom, $prenom]));
+                $message = 'Le médecin <strong>' . $nom . ' ' . $prenom . '</strong> a été ajouté !';
+                $classeMessage = 'succes';
+            } catch (PDOException $e) {
+                $codeErreur = $e->getCode();
+                // Si le code vaut 23000, alors la contrainte d'unicité du nom et prénom a été violée
+                if ($codeErreur == '23000') {
+                    $message = 'Le médecin <strong>' . $nom . ' ' . $prenom . '</strong> existe déjà.';
+                } else {
+                    $message = 'Une erreur s\'est produite : ' . $e->getMessage();
+                }
+                $classeMessage = 'erreur';
+            }
         }
 
         // Affichage de la popup d'erreur ou de succés

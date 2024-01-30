@@ -1,8 +1,10 @@
 <?php session_start();
     require('fonctions.php');
+    require('fonctionsVerifierInputs.php');
     verifierAuthentification();
     $pdo = creerConnexion();
 
+    $today = gmdate('Y-m-d', time());
     if (isset($_POST["Confirmer"]) && !empty($_POST["Confirmer"])) {
         $civ = $_POST['civ'];
         $nom = $_POST['nom'];
@@ -15,26 +17,47 @@
         $lieu = $_POST['lieu'];
         $idMed = !empty($_POST['idMedecin']) ? $_POST['idMedecin'] : null;
 
-        $stmt = $pdo->prepare("INSERT INTO usager (civilite, nom, prenom, adresse, ville, codePostal, numeroSecuriteSociale, dateNaissance, lieuNaissance, medecinReferent)
-                                VALUES (?,?,?,?,?,?,?,?,?,?)");
-        verifierPrepare($stmt);
-        verifierExecute($stmt->execute([$civ, $nom, $prenom, $adr, $ville, $cp, $nss, $date, $lieu, $idMed]));
-
         $message = '';
         $classeMessage = '';
-        try {
-            $stmt->execute();
-            $message = 'L\'usager <strong>' . $nom . ' ' . $prenom . '</strong> a été ajouté !';
-            $classeMessage = 'succes';
-        } catch (PDOException $e) {
-            $codeErreur = $e->getCode();
-            // Si le code vaut 23000, alors la contrainte d'unicité du numéro de sécurité sociale a été violée
-            if ($codeErreur == '23000') {
-                $message = 'Un usager avec le numéro de sécurité sociale <strong>' . $nss . '</strong> existe déjà.';
-            } else {
-                $message = 'Une erreur s\'est produite : ' . $e->getMessage();
-            }
+        if (!inputSansEspacesCorrect($nom, TAILLE_NOM)){
+            $message = 'Le nom n\'est pas correctement saisi';
             $classeMessage = 'erreur';
+        } else if (!inputSansEspacesCorrect($prenom, TAILLE_PRENOM)){
+            $message = 'Le prénom n\'est pas correctement saisi';
+            $classeMessage = 'erreur';
+        } else if (!inputAvecUnEspaceCorrect($adr, TAILLE_ADRESSE)){
+            $message = 'L\'adresse n\'est pas correctement saisie';
+            $classeMessage = 'erreur';
+        } else if (!inputSansEspacesCorrect($ville, TAILLE_VILLE)){
+            $message = 'La ville n\'est pas correctement saisie';
+            $classeMessage = 'erreur';
+        } else if (!inputChiffresUniquementCorrect($cp, TAILLE_CODE_POSTAL) || !tailleInputRespectee($cp, TAILLE_CODE_POSTAL)){
+            $message = 'Le code postal n\'est pas correctement saisi';
+            $classeMessage = 'erreur';
+        } else if (!inputChiffresUniquementCorrect($nss, TAILLE_NUMERO_SECU) || !tailleInputRespectee($nss, TAILLE_NUMERO_SECU)){
+            $message = 'Le numéro de sécurité sociale n\'est pas correctement saisi';
+            $classeMessage = 'erreur';
+        } else if (!inputSansEspacesCorrect($lieu, TAILLE_VILLE)){
+            $message = 'La ville de naissance n\'est pas correctement saisie';
+            $classeMessage = 'erreur';
+        } else {
+            $stmt = $pdo->prepare("INSERT INTO usager (civilite, nom, prenom, adresse, ville, codePostal, numeroSecuriteSociale, dateNaissance, lieuNaissance, medecinReferent)
+                                    VALUES (?,?,?,?,?,?,?,?,?,?)");
+            verifierPrepare($stmt);
+            try {
+                verifierExecute($stmt->execute([$civ, $nom, $prenom, $adr, $ville, $cp, $nss, $date, $lieu, $idMed]));
+                $message = 'L\'usager <strong>' . $nom . ' ' . $prenom . '</strong> a été ajouté !';
+                $classeMessage = 'succes';
+            } catch (PDOException $e) {
+                $codeErreur = $e->getCode();
+                // Si le code vaut 23000, alors la contrainte d'unicité du numéro de sécurité sociale a été violée
+                if ($codeErreur == '23000') {
+                    $message = 'Un usager avec le numéro de sécurité sociale <strong>' . $nss . '</strong> existe déjà.';
+                } else {
+                    $message = 'Une erreur s\'est produite : ' . $e->getMessage();
+                }
+                $classeMessage = 'erreur';
+            }
         }
 
         // Affichage de la popup d'erreur ou de succés
@@ -95,17 +118,17 @@
                 Ville <input type="text" name="ville" value="" maxlength=50 required>
             </div>
             <div class="colonne_formulaire petit">
-                Code postal <input type="text" name="cp" value="" minlength=5 maxlength=5 oninput="chiffresUniquement(event)" required>
+                Code postal <input type="text" name="cp" value="" minlength=5 maxlength=5 class="chiffres_uniquement" required>
             </div>
         </div>
         <div class="ligne_formulaire">
             <div class="colonne_formulaire moitie">
-                N° Sécurité sociale <input type="text" name="nss" value="" minlength=15 maxlength=15 oninput="chiffresUniquement(event)" required>
+                N° Sécurité sociale <input type="text" name="nss" value="" minlength=15 maxlength=15 class="chiffres_uniquement" required>
             </div>
         </div>
         <div class="ligne_formulaire">
             <div class="colonne_formulaire moitie">
-                Date de naissance <input type="date" name="date" value="" required>
+                Date de naissance <input type="date" name="date" value="" min="01/01/1900" max="<?php echo $today ?>" required>
             </div>
             <div class="colonne_formulaire moitie">
                 Lieu de naissance <input type="text" name="lieu" value="" maxlength=50 required>
