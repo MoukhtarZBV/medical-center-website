@@ -56,10 +56,10 @@
     }
 
     function creerComboboxUsagers($pdo, $idUsager, $message) {
-        $stmt = $pdo->prepare("SELECT idUsager, numeroSecuriteSociale, civilite, nom, prenom FROM usager ORDER BY nom, prenom ASC");
+        $stmt = $pdo->prepare("SELECT idUsager, numeroSecuriteSociale, civilite, nom, prenom, medecinReferent FROM usager ORDER BY nom, prenom ASC");
         verifierPrepare($stmt);
         verifierExecute($stmt->execute());
-        echo '<select name="idUsager">';
+        echo '<select name="idUsager" id="combobox_usagers">';
         if ($message != null){
             echo '<option value="">' . $message . '</option>';
         }
@@ -67,7 +67,7 @@
             $id = $dataUsager["idUsager"];
             $titre = str_pad($dataUsager["civilite"] . '. ', 5, ' ') . $dataUsager["nom"] . ' ' . $dataUsager["prenom"] . ' (' . $dataUsager["numeroSecuriteSociale"] . ')';
             $selected = $idUsager == $id ? 'selected' : '';
-            echo '<option value=' . $id . ' ' . $selected . '> ' . $titre . '</option>';
+            echo '<option value=' . $id . ' ' . $selected . ' data-idMedecinRef=' . $dataUsager["medecinReferent"] . '> ' . $titre . '</option>';
         }
         echo '</select>';
     } 
@@ -76,7 +76,7 @@
         $stmt = $pdo->prepare("SELECT idMedecin, civilite, nom, prenom FROM medecin");
         verifierPrepare($stmt);
         verifierExecute($stmt->execute());
-        echo '<select name="idMedecin">';
+        echo '<select name="idMedecin" id="combobox_medecins">';
         if ($message != null){
             echo '<option value="">' . $message . '</option>';
         }

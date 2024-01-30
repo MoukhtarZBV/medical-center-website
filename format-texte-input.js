@@ -1,6 +1,7 @@
 function premiereLettreMajuscule(input) {
     input.addEventListener('input', function () {
         this.value = this.value.charAt(0).toUpperCase() + this.value.slice(1).toLowerCase();
+        this.value = this.value.replace(/[0-9]/g, '');
     });
 }
 
@@ -16,14 +17,14 @@ function empecherPlusieursEspaces(input) {
     });
 }
 
-function chiffresUniquement(event) {
-    const input = event.target;
-    const texteInput = input.value;
-    input.value = texteInput.replace(/\D/g, '');
+function chiffresUniquement(input) {
+    input.addEventListener('input', function () {
+        this.value = this.value.replace(/\D/g, '');
+    });
 }
 
 
-var inputsTextuels = document.querySelectorAll('input[type="text"]:not(.espaces_permis)');
+var inputsTextuels = document.querySelectorAll('input[type="text"]:not(.espaces_permis, .chiffres_uniquement)');
 
 // On attache un listener à tous les inputs de type 'text' 
 // pour mettre la premiere lettre en majuscule et empecher les
@@ -39,4 +40,11 @@ var inputsTextuelsAvecEspaces = document.querySelectorAll('input[type="text"].es
 // et de classe 'espaces_permis' pour empecher plus d'un espace à la fois
 inputsTextuelsAvecEspaces.forEach(function (input){
     empecherPlusieursEspaces(input);
+});
+
+var inputsChiffre = document.querySelectorAll('input[type="text"].chiffres_uniquement');
+
+// On attache un listener à tous les inputs censé être des nombres 
+inputsChiffre.forEach(function (input){
+    chiffresUniquement(input);
 });
