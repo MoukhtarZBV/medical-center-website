@@ -5,8 +5,8 @@
     --gris: #ebebeb;
 }
 
-body{
-    margin:0;
+body {
+    margin: 0px;
 }
 
 /* ############### Conteneur principaux ############### */
@@ -153,6 +153,15 @@ body{
 
 .liste_deroulante li:first-child {
     border-top: white 3px solid;
+}
+
+#body_accueil #menu_navigation {
+    background-color: rgba(16, 122, 202, 0.45);
+}
+
+#body_accueil #navigation,
+#body_accueil .headings {
+    background-color:unset;
 }
 
 @media screen and (max-width:1000px){
